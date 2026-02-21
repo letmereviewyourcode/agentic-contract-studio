@@ -79,6 +79,8 @@ Users can override these dynamically in the About Menu BYOK inputs:
 - **Base URL**: e.g. `http://localhost:4000/v1`
 - **Model Name**: e.g. `claude-3-5-sonnet-20241022` or `llama3.1`
 
+> 🪄 **Google Gemini Auto-Detect**: If your API key starts with `AIza` (a standard Google Cloud / AI Studio key prefix), the Studio will automatically route your request to Google's official OpenAI-compatible endpoint (`https://generativelanguage.googleapis.com/v1beta/openai/`) using `gemini-2.5-flash`. You do not need to fill out the Base URL or Model inputs for Gemini!
+
 Server defaults can be set in `.env.local`:
 ```bash
 # Default: gpt-4o-mini (cheap, fast, good enough for rewrites)

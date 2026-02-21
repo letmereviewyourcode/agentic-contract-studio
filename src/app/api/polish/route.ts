@@ -75,8 +75,17 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: { code: 'BAD_REQUEST', message: 'No tools provided' } }, { status: 400 });
         }
 
-        const model = userModel?.trim() || process.env.POLISH_MODEL || 'gpt-4o-mini';
-        const baseUrl = userBaseUrl?.trim() || undefined;
+        let model = userModel?.trim() || process.env.POLISH_MODEL || 'gpt-4o-mini';
+        let baseUrl = userBaseUrl?.trim() || undefined;
+
+        // Auto-detect Gemini keys (they start with AIza) and apply default Google endpoint
+        // if the user didn't explicitly provide a custom base URL.
+        if (apiKey.startsWith('AIza') && !userBaseUrl?.trim()) {
+            baseUrl = 'https://generativelanguage.googleapis.com/v1beta/openai/';
+            if (!userModel?.trim()) {
+                model = 'gemini-2.5-flash';
+            }
+        }
 
         const { polished, explanations } = await polishTools(tools, apiKey, model, baseUrl);
         return NextResponse.json({ polished, explanation: explanations.join('\n\n') });

@@ -80,7 +80,7 @@ PUBLIC_DEMO=true    # Central polish is disabled; users MUST Provide a BYOK API 
 
 The **core pipeline** (Score + Auto-Fix) is 100% deterministic — no LLM, no randomness, no API key needed. It runs identically every time.
 
-**LLM Polish** is an optional enhancement that rewrites descriptions and examples for clarity. It only changes wording — never parameter names, types, or schema structure. It is architected to be **Provider-Neutral** via the OpenAI-compatible API standard. See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md).
+**LLM Polish** is an optional enhancement that rewrites descriptions and examples for clarity. It explains its reasoning directly in the chat UI, but it only changes wording — never parameter names, types, or schema structure. It is architected to be **Provider-Neutral** via the OpenAI-compatible API standard. See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md).
 
 ### ChatKit
 

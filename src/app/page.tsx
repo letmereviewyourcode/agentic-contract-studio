@@ -263,7 +263,7 @@ export default function Home() {
             <h2 className="modal-title">Tool Credit Score <span className="modal-title-sub">(for Agents)</span></h2>
             <p className="modal-desc">
               <strong>Why this exists:</strong> Agents fail because tool specs are underspecified. This scores and auto-fixes MCP tool contracts so agents call tools reliably.<br /><br />
-              <strong>Public demo is deterministic.</strong> Optional BYOK polish supports any OpenAI-compatible endpoint (including gateways like LiteLLM).
+              <strong>Public demo is deterministic.</strong> Optional BYOK polish supports any OpenAI-compatible endpoint. LLM Polish also provides a transparent explanation of its changes.
             </p>
 
             <div className="modal-links">

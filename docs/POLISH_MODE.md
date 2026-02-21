@@ -9,6 +9,7 @@ Polish calls an OpenAI-compatible LLM (configurable via `POLISH_MODEL` and Base 
 1. Rewrite tool descriptions to be clear and action-oriented
 2. Improve parameter descriptions for unambiguity
 3. Add or improve examples with realistic values
+4. Provide a brief explanation of its reasoning directly in the chat UI
 
 ## What Polish Does NOT Do
 

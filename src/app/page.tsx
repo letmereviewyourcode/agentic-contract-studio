@@ -8,7 +8,7 @@ import type { MCPTool, ScoreResult, FixResult } from '@/lib/types';
 
 const APP_VERSION = 'v0.1.x';
 const LINKEDIN_URL = 'https://www.linkedin.com/in/zishanalikhan';
-const GITHUB_URL = ''; // Set after repo publish
+const GITHUB_URL = 'https://github.com/letmereviewyourcode/agentic-contract-studio';
 
 export default function Home() {
   const [tools, setTools] = useState<MCPTool[]>([]);
@@ -22,6 +22,7 @@ export default function Home() {
   const [userApiKey, setUserApiKey] = useState('');
   const [userBaseUrl, setUserBaseUrl] = useState('');
   const [userModel, setUserModel] = useState('');
+  const [testStatus, setTestStatus] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
     { role: 'assistant', content: 'Welcome to **Agent Contract Studio**! 🛠️\n\nImport your MCP tool specs from the left panel, then use the actions below to analyze and improve them.\n\n• **Score** — Run the deterministic rubric (0–100)\n• **Auto-Fix** — Normalize & add missing fields\n• **Polish** — LLM-powered rewrite (optional)\n• **Export** — Download improved specs' },
   ]);
@@ -164,6 +165,31 @@ export default function Home() {
     addMessage('assistant', '📥 **Exported!** `tools-fixed.json` has been downloaded.');
   }, [fixedTools, addMessage]);
 
+  const handleTestConnection = useCallback(async () => {
+    if (!userApiKey.trim()) {
+      setTestStatus('❌ API Key required');
+      return;
+    }
+    setTestStatus('Testing...');
+    try {
+      const res = await fetch('/api/polish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tools: [{ name: 'connection_test', description: 'test', inputSchema: { type: 'object', properties: {} } }],
+          userApiKey,
+          userBaseUrl,
+          userModel
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message);
+      setTestStatus('✅ Connection successful!');
+    } catch (e) {
+      setTestStatus(`❌ Failed: ${(e as Error).message}`);
+    }
+  }, [userApiKey, userBaseUrl, userModel]);
+
   return (
     <>
       {/* ─── App Header ────────────────────────────────────────────── */}
@@ -263,8 +289,8 @@ export default function Home() {
                 <input
                   type="password"
                   value={userApiKey}
-                  onChange={e => setUserApiKey(e.target.value)}
-                  placeholder="API Key (sk-proj-...)"
+                  onChange={e => { setUserApiKey(e.target.value); setTestStatus(null); }}
+                  placeholder="API Key (sk-proj-...) (Required)"
                   className="input"
                   style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                   data-testid="byok-input-key"
@@ -272,8 +298,8 @@ export default function Home() {
                 <input
                   type="text"
                   value={userBaseUrl}
-                  onChange={e => setUserBaseUrl(e.target.value)}
-                  placeholder="Base URL (e.g. https://api.openai.com/v1)"
+                  onChange={e => { setUserBaseUrl(e.target.value); setTestStatus(null); }}
+                  placeholder="Base URL (e.g. https://api.openai.com/v1) (Optional)"
                   className="input"
                   style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                   data-testid="byok-input-url"
@@ -281,8 +307,8 @@ export default function Home() {
                 <input
                   type="text"
                   value={userModel}
-                  onChange={e => setUserModel(e.target.value)}
-                  placeholder="Model (e.g. gpt-4o-mini)"
+                  onChange={e => { setUserModel(e.target.value); setTestStatus(null); }}
+                  placeholder="Model (e.g. gpt-4o-mini) (Optional)"
                   className="input"
                   style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                   data-testid="byok-input-model"
@@ -291,21 +317,37 @@ export default function Home() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', margin: 0, maxWidth: '280px' }}>
-                  <strong>Warning:</strong> Key is used only for this request/session and is never stored server-side.
+                  <strong>Warning:</strong> Key is never stored server-side.
                   Refresh the page to clear it.
                 </p>
-                <button
-                  className="btn btn-secondary"
-                  style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto', height: 'auto' }}
-                  onClick={() => {
-                    setUserApiKey('');
-                    setUserBaseUrl('');
-                    setUserModel('');
-                  }}
-                  data-testid="byok-clear-btn"
-                >
-                  Clear key
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {testStatus && (
+                    <span style={{ fontSize: '11px', color: testStatus.startsWith('❌') ? 'var(--error)' : (testStatus.startsWith('✅') ? 'var(--success)' : 'var(--text-tertiary)') }}>
+                      {testStatus}
+                    </span>
+                  )}
+                  <button
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto', height: 'auto' }}
+                    onClick={handleTestConnection}
+                    disabled={testStatus === 'Testing...'}
+                  >
+                    Test
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto', height: 'auto' }}
+                    onClick={() => {
+                      setUserApiKey('');
+                      setUserBaseUrl('');
+                      setUserModel('');
+                      setTestStatus(null);
+                    }}
+                    data-testid="byok-clear-btn"
+                  >
+                    Clear
+                  </button>
+                </div>
               </div>
             </div>
 

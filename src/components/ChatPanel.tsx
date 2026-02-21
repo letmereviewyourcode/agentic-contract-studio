@@ -52,9 +52,11 @@ export function ChatPanel({
     }, [messages]);
 
     const isPolishReady = polishEnabled || userApiKey.trim().length > 0;
-    const polishDisabledReason = !isPolishReady
-        ? 'Provide your OpenAI-compatible API key in the About menu to enable LLM polish.'
-        : null;
+    const polishDisabledReason = !hasTools
+        ? 'Import tools first to enable polish.'
+        : !isPolishReady
+            ? 'Provide your OpenAI-compatible API key in the About menu to enable LLM polish.'
+            : null;
 
     return (
         <div className="panel" data-testid="chat-panel">

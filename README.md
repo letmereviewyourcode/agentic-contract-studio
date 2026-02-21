@@ -150,10 +150,4 @@ When `E2E=1` is set, the GitHub import route serves from `public/examples/tools.
 | Deployment guide | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
 | Demo script | [`docs/DEMO_SCRIPT_ENTERPRISE.md`](docs/DEMO_SCRIPT_ENTERPRISE.md) |
 
----
 
-## Next Steps
-
-- [ ] GitHub repo setup + CI pipeline
-- [ ] Vercel deployment (see `docs/DEPLOYMENT.md`)
-- [ ] Repo hygiene: license, badges, embedded screenshots

@@ -202,6 +202,13 @@ test.describe('Agent Contract Studio E2E', () => {
         await page.getByTestId('btn-load-sample').click();
         await page.getByTestId('btn-import-paste').click();
 
+        // Run the pipeline to unlock Polish
+        await page.getByTestId('score-button').click();
+        await expect(page.getByTestId('chat-messages')).toContainText('Scoring complete', { timeout: 10000 });
+
+        await page.getByTestId('fix-button').click();
+        await expect(page.getByTestId('chat-messages')).toContainText('Auto-fix complete', { timeout: 10000 });
+
         // Polish button should be visible but disabled
         const polishBtn = page.getByTestId('polish-button');
         await expect(polishBtn).toBeVisible();

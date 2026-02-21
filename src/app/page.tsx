@@ -231,6 +231,7 @@ export default function Home() {
           userApiKey={userApiKey}
           publicDemo={publicDemo}
           hasTools={tools.length > 0}
+          hasScored={scoreResults.length > 0}
           hasFixedTools={fixedTools.length > 0}
         />
         <ResultsPanel

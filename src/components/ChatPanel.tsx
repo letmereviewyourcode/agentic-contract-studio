@@ -13,6 +13,7 @@ interface ChatPanelProps {
     userApiKey: string;
     publicDemo: boolean;
     hasTools: boolean;
+    hasScored: boolean;
     hasFixedTools: boolean;
 }
 
@@ -34,6 +35,7 @@ export function ChatPanel({
     userApiKey,
     publicDemo,
     hasTools,
+    hasScored,
     hasFixedTools,
 }: ChatPanelProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -52,11 +54,21 @@ export function ChatPanel({
     }, [messages]);
 
     const isPolishReady = polishEnabled || userApiKey.trim().length > 0;
+
+    // Explicit pipeline enforcement tooltips
+    const fixDisabledReason = !hasTools
+        ? 'Import tools first to enable Auto-Fix.'
+        : !hasScored
+            ? 'Please run Score first before Auto-Fixing.'
+            : null;
+
     const polishDisabledReason = !hasTools
         ? 'Import tools first to enable polish.'
-        : !isPolishReady
-            ? 'Provide your OpenAI-compatible API key in the About menu to enable LLM polish.'
-            : null;
+        : !hasFixedTools
+            ? 'Please run Auto-Fix first before polishing.'
+            : !isPolishReady
+                ? 'Provide your OpenAI-compatible API key in the About menu to enable LLM polish.'
+                : null;
 
     return (
         <div className="panel" data-testid="chat-panel">
@@ -109,19 +121,26 @@ export function ChatPanel({
                 >
                     {loading === 'score' ? <><span className="spinner" /> Scoring...</> : 'Score'}
                 </button>
-                <button
-                    className="btn btn-success"
-                    onClick={onFix}
-                    disabled={!hasTools || loading === 'fix'}
-                    data-testid="fix-button"
-                >
-                    {loading === 'fix' ? <><span className="spinner" /> Fixing...</> : 'Auto-Fix'}
-                </button>
+                <div className="tooltip-wrapper">
+                    <button
+                        className="btn btn-success"
+                        onClick={onFix}
+                        disabled={!hasScored || loading === 'fix'}
+                        data-testid="fix-button"
+                    >
+                        {loading === 'fix' ? <><span className="spinner" /> Fixing...</> : 'Auto-Fix'}
+                    </button>
+                    {fixDisabledReason && (
+                        <span className="tooltip-text" data-testid="fix-tooltip">
+                            {fixDisabledReason}
+                        </span>
+                    )}
+                </div>
                 <div className="tooltip-wrapper">
                     <button
                         className="btn btn-warning"
                         onClick={onPolish}
-                        disabled={!isPolishReady || !hasTools || loading === 'polish'}
+                        disabled={!isPolishReady || !hasFixedTools || loading === 'polish'}
                         data-testid="polish-button"
                         title={polishDisabledReason || undefined}
                     >

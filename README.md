@@ -1,36 +1,155 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agent Contract Studio
 
-## Getting Started
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-First, run the development server:
+> **Built by Zishan Ali Khan** · [LinkedIn](https://www.linkedin.com/in/zishanalikhan)
+>
+> **Tool Credit Score** — Deterministic scoring + auto-fix for MCP tool specifications.  
+> Optional LLM polish (local-only).
+
+## Why this exists
+Agents fail in production because tool specs are underspecified. This studio scores your MCP tools and auto-fixes them so agents call tools reliably.
+
+## What It Does
+
+You paste (or upload, or fetch from GitHub) an MCP tool spec, and the studio:
+
+1. **Previews** imported JSON in the new "Imported" tab
+2. **Scores** it against a 5-category deterministic rubric (0–100)
+3. **Auto-fixes** naming, descriptions, parameter types, examples, and annotations
+4. *(Optional)* **Polishes** descriptions with GPT-4o-mini (local-only, requires key)
+5. **Exports** the strictly formatted `tools.fixed.json` (canonical `{ tools: [...] }` wrapper)
+
+No LLM is required for scoring or auto-fix — those are fully deterministic.
+
+---
+
+## Quick Start
 
 ```bash
+# Install
+npm install
+
+# Run
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# → http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Enable LLM Polish (local-only, optional)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.local
+# Add your OPENAI_API_KEY
+# Set ENABLE_POLISH=true
+# Restart dev server
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Polish requires all three conditions:
+1. `ENABLE_POLISH=true`
+2. `OPENAI_API_KEY` is set
+3. `PUBLIC_DEMO` is NOT `true`
 
-## Learn More
+See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md) for details.
 
-To learn more about Next.js, take a look at the following resources:
+### Public Demo Mode
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For public-facing deployments where polish must be off:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+PUBLIC_DEMO=true    # Polish endpoint returns 403 (POLISH_DISABLED)
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Layer | Stack | Notes |
+|---|---|---|
+| Frontend | Next.js 16 App Router, React, TypeScript | Header → 3-column → Footer |
+| Styling | Tailwind CSS + custom design tokens | Enterprise audit aesthetic (charcoal + muted teal) |
+| API | Next.js route handlers (server-side) | `/api/score`, `/api/fix`, `/api/polish`, `/api/import/github`, `/api/config` |
+| Chat UI | Standard React components | ChatKit probed on mount; falls back to local mode |
+| Scoring | Deterministic (no LLM) | 5 weighted categories, JSON rubric |
+| Auto-Fix | Deterministic (no LLM) | snake_case, verb prefix, param types, examples |
+| Polish | GPT-4o-mini (local-only) | Three-gate enforcement; 403 in PUBLIC_DEMO |
+
+### Deterministic Pipeline vs LLM Polish
+
+The **core pipeline** (Score + Auto-Fix) is 100% deterministic — no LLM, no randomness, no API key needed. It runs identically every time.
+
+**LLM Polish** is an optional enhancement that rewrites descriptions and examples for clarity. It only changes wording — never parameter names, types, or schema structure. It requires an OpenAI key and is explicitly disabled in public demo mode. See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md).
+
+### ChatKit
+
+The app imports `@openai/chatkit-react` and probes `/api/chatkit/session` on mount. If a ChatKit backend is configured (Agent Builder workflow), the center panel shows "ChatKit Live" and uses the full ChatKit widget. Otherwise it falls back to standard React chat components — labeled "Local Mode." ChatKit and Polish are **independent features**.
+
+### Security
+
+- **`OPENAI_API_KEY`** is never sent to the client. Server-side only in `/api/polish`.
+- `/api/config` exposes only: `{ polishEnabled: boolean, publicDemo: boolean, version: string }`
+- **`PUBLIC_DEMO=true`** makes the polish endpoint return `403` with `POLISH_DISABLED` code.
+
+---
+
+## Testing
+
+```bash
+# Install Playwright browsers (first time)
+npx playwright install --with-deps
+
+# Run all E2E tests (7 tests, runs in PUBLIC_DEMO mode)
+npm run test:e2e
+
+# Run with Playwright UI
+npm run test:e2e:ui
+```
+
+### Test Scenarios (7 total)
+
+| # | Scenario | What it tests |
+|---|---|---|
+| 1 | Paste → Score → Auto-Fix → Export | Full deterministic happy path |
+| 2 | Upload → Score → Auto-Fix | File input pipeline |
+| 3 | GitHub → Score (fixture) | E2E fixture fallback (`E2E=1`) |
+| 4 | MCP tab disabled | Visible + disabled + "Coming soon" |
+| 5 | Header + About modal | Branding, LinkedIn link, modal open/close |
+| 6 | Polish button disabled | Disabled + tooltip in PUBLIC_DEMO |
+| 7 | /api/polish → 403 | `POLISH_DISABLED` code enforcement |
+
+### E2E Fixture Fallback
+
+When `E2E=1` is set, the GitHub import route serves from `public/examples/tools.json` instead of fetching from GitHub. Tests also run with `PUBLIC_DEMO=true` to verify polish enforcement.
+
+---
+
+## Environment Variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OPENAI_API_KEY` | — | Enables LLM polish (server-side only) |
+| `ENABLE_POLISH` | `false` | Explicit opt-in for polish |
+| `PUBLIC_DEMO` | `false` | Set `true` to disable polish (403) |
+| `POLISH_MODEL` | `gpt-4o-mini` | Model for polish |
+| `E2E` | — | Set by Playwright; enables GitHub fixture fallback |
+
+---
+
+## Docs
+
+| Document | Path |
+|---|---|
+| Architecture & plan | [`docs/PLAN.md`](docs/PLAN.md) |
+| Polish mode | [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md) |
+| QA checklist | [`docs/QA_CHECKLIST.md`](docs/QA_CHECKLIST.md) |
+| Current status | [`docs/HANDOFF.md`](docs/HANDOFF.md) |
+| Changelog | [`docs/CHANGELOG.md`](docs/CHANGELOG.md) |
+| Deployment guide | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+| Demo script | [`docs/DEMO_SCRIPT_ENTERPRISE.md`](docs/DEMO_SCRIPT_ENTERPRISE.md) |
+
+---
+
+## Next Steps
+
+- [ ] GitHub repo setup + CI pipeline
+- [ ] Vercel deployment (see `docs/DEPLOYMENT.md`)
+- [ ] Repo hygiene: license, badges, embedded screenshots

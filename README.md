@@ -35,28 +35,31 @@ npm run dev
 # → http://localhost:3000
 ```
 
-### Enable LLM Polish (local-only, optional)
+### Enable LLM Polish (OpenAI-compatible endpoints)
 
 ```bash
 cp .env.example .env.local
 # Add your OPENAI_API_KEY
 # Set ENABLE_POLISH=true
+# Set POLISH_MODEL=gpt-4o-mini (or your preferred model)
 # Restart dev server
 ```
 
 Polish requires all three conditions:
 1. `ENABLE_POLISH=true`
-2. `OPENAI_API_KEY` is set
-3. `PUBLIC_DEMO` is NOT `true`
+2. `OPENAI_API_KEY` is set (or user provides BYOK)
+3. `PUBLIC_DEMO` is NOT `true` (unless overridden by BYOK)
+
+You can point the Studio at **any** OpenAI-compatible endpoint (like LiteLLM, vLLM, Ollama, etc.) by supplying a custom Base URL and Model name in the UI's BYOK settings.
 
 See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md) for details.
 
 ### Public Demo Mode
 
-For public-facing deployments where polish must be off:
+For public-facing deployments where server-side polish must be off:
 
 ```bash
-PUBLIC_DEMO=true    # Polish endpoint returns 403 (POLISH_DISABLED)
+PUBLIC_DEMO=true    # Central polish is disabled; users MUST Provide a BYOK API Key.
 ```
 
 ---
@@ -71,13 +74,13 @@ PUBLIC_DEMO=true    # Polish endpoint returns 403 (POLISH_DISABLED)
 | Chat UI | Standard React components | ChatKit probed on mount; falls back to local mode |
 | Scoring | Deterministic (no LLM) | 5 weighted categories, JSON rubric |
 | Auto-Fix | Deterministic (no LLM) | snake_case, verb prefix, param types, examples |
-| Polish | GPT-4o-mini (local-only) | Three-gate enforcement; 403 in PUBLIC_DEMO |
+| Polish | Any OpenAI-compatible LLM | Three-gate enforcement; Provider-neutral BYOK via UI |
 
 ### Deterministic Pipeline vs LLM Polish
 
 The **core pipeline** (Score + Auto-Fix) is 100% deterministic — no LLM, no randomness, no API key needed. It runs identically every time.
 
-**LLM Polish** is an optional enhancement that rewrites descriptions and examples for clarity. It only changes wording — never parameter names, types, or schema structure. It requires an OpenAI key and is explicitly disabled in public demo mode. See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md).
+**LLM Polish** is an optional enhancement that rewrites descriptions and examples for clarity. It only changes wording — never parameter names, types, or schema structure. It is architected to be **Provider-Neutral** via the OpenAI-compatible API standard. See [`docs/POLISH_MODE.md`](docs/POLISH_MODE.md).
 
 ### ChatKit
 
@@ -86,8 +89,9 @@ The app imports `@openai/chatkit-react` and probes `/api/chatkit/session` on mou
 ### Security
 
 - **`OPENAI_API_KEY`** is never sent to the client. Server-side only in `/api/polish`.
+- **BYOK Keys** are kept locally in React State and passed per request. They are NEVER logged or persisted to DB by the server.
 - `/api/config` exposes only: `{ polishEnabled: boolean, publicDemo: boolean, version: string }`
-- **`PUBLIC_DEMO=true`** makes the polish endpoint return `403` with `POLISH_DISABLED` code.
+- **`PUBLIC_DEMO=true`** makes the polish endpoint require a BYOK config payload or else it returns `400` with `MISSING_API_KEY`.
 
 ---
 

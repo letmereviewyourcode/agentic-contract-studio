@@ -209,28 +209,54 @@ test.describe('Agent Contract Studio E2E', () => {
 
         // Tooltip should explain why
         const tooltip = page.getByTestId('polish-tooltip');
-        await expect(tooltip).toContainText('Provide your OpenAI API key');
+        await expect(tooltip).toContainText('Provide your OpenAI-compatible API key');
 
         // Open About Modal to inject BYOK
         await page.getByTestId('about-button').click();
-        await page.getByTestId('byok-input').fill('sk-proj-testkey123');
+        await page.getByTestId('byok-input-key').fill('sk-proj-testkey123');
+        await page.getByTestId('byok-input-url').fill('http://localhost:8080/v1');
         await page.getByTestId('about-modal').locator('button[aria-label="Close"]').click();
 
         // Button should now be enabled
         await expect(polishBtn).not.toBeDisabled();
         await expect(tooltip).not.toBeVisible();
+
+        // Mock the /api/polish endpoint to prevent real API calls during test
+        await page.route('/api/polish', async route => {
+            const request = route.request();
+            const postData = request.postDataJSON();
+
+            // Verify our neutral configs were passed
+            expect(postData.userApiKey).toBe('sk-proj-testkey123');
+            expect(postData.userBaseUrl).toBe('http://localhost:8080/v1');
+
+            await route.fulfill({
+                status: 200,
+                json: {
+                    polished: [{
+                        name: 'mock_polished_tool',
+                        description: 'This is a mock polished description.',
+                        inputSchema: { type: 'object', properties: {} }
+                    }]
+                }
+            });
+        });
+
+        // Click polish and verify the mock response is handled
+        await polishBtn.click();
+        await expect(page.getByTestId('chat-messages')).toContainText('LLM polish complete!');
     });
 
-    // ─── Test 7: /api/polish returns 403 with POLISH_DISABLED ───────
-    test('/api/polish returns 403 with POLISH_DISABLED code', async ({ request }) => {
+    // ─── Test 7: /api/polish returns 400 with MISSING_API_KEY code ───────
+    test('/api/polish returns 400 with MISSING_API_KEY code', async ({ request }) => {
         const res = await request.post('/api/polish', {
             data: { tools: [{ name: 'test', description: 'test', inputSchema: {} }] },
         });
 
-        expect(res.status()).toBe(403);
+        expect(res.status()).toBe(400);
 
         const body = await res.json();
         expect(body.ok).toBe(false);
-        expect(body.error.code).toBe('POLISH_DISABLED');
+        expect(body.error.code).toBe('MISSING_API_KEY');
     });
 });

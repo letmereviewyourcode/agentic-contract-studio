@@ -25,14 +25,14 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
     if (!checkRateLimit(ip)) {
         return NextResponse.json(
-            { error: 'Rate limit exceeded. Please wait a minute before trying again.' },
+            { error: { code: 'RATE_LIMITED', message: 'Rate limit exceeded. Please wait a minute before trying again.' } },
             { status: 429 }
         );
     }
 
     try {
         const body = await req.json();
-        const { tools: rawTools, raw, userApiKey } = body;
+        const { tools: rawTools, raw, userApiKey, userBaseUrl, userModel } = body;
 
         // Resolve which API key to use
         const isPublicDemo = process.env.PUBLIC_DEMO === 'true';
@@ -42,14 +42,14 @@ export async function POST(req: NextRequest) {
             // Fallback to server key only if NOT in public demo AND polish is enabled
             if (isPublicDemo) {
                 return NextResponse.json(
-                    { ok: false, error: { code: 'POLISH_DISABLED', message: 'Central LLM polish is disabled in the public demo. Provide your own OpenAI API key.' } },
-                    { status: 403 }
+                    { ok: false, error: { code: 'MISSING_API_KEY', message: 'Central LLM polish is disabled in the public demo. Provide your own OpenAI-compatible API key.' } },
+                    { status: 400 }
                 );
             }
             if (process.env.ENABLE_POLISH !== 'true') {
                 return NextResponse.json(
-                    { ok: false, error: { code: 'POLISH_DISABLED', message: 'Polish is disabled in the server configuration.' } },
-                    { status: 403 }
+                    { ok: false, error: { code: 'MISSING_API_KEY', message: 'Polish is disabled in the server configuration.' } },
+                    { status: 400 }
                 );
             }
             apiKey = process.env.OPENAI_API_KEY;
@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
 
         if (!apiKey) {
             return NextResponse.json(
-                { ok: false, error: { code: 'POLISH_DISABLED', message: 'No OpenAI API key provided or configured.' } },
-                { status: 403 }
+                { ok: false, error: { code: 'MISSING_API_KEY', message: 'No OpenAI API key provided or configured.' } },
+                { status: 400 }
             );
         }
 
@@ -66,19 +66,26 @@ export async function POST(req: NextRequest) {
         if (raw && !tools) {
             const result = parseToolsFromJSON(raw);
             if (!result.success) {
-                return NextResponse.json({ error: result.error }, { status: 400 });
+                return NextResponse.json({ error: { code: 'BAD_REQUEST', message: result.error } }, { status: 400 });
             }
             tools = result.tools;
         }
 
         if (!tools || !Array.isArray(tools) || tools.length === 0) {
-            return NextResponse.json({ error: 'No tools provided' }, { status: 400 });
+            return NextResponse.json({ error: { code: 'BAD_REQUEST', message: 'No tools provided' } }, { status: 400 });
         }
 
-        const model = process.env.POLISH_MODEL || 'gpt-4o-mini';
-        const polished = await polishTools(tools, apiKey, model);
+        const model = userModel?.trim() || process.env.POLISH_MODEL || 'gpt-4o-mini';
+        const baseUrl = userBaseUrl?.trim() || undefined;
+
+        const polished = await polishTools(tools, apiKey, model, baseUrl);
         return NextResponse.json({ polished });
     } catch (e) {
-        return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+        // Obfuscate upstream errors safely
+        console.error('Upstream LLM error:', e);
+        return NextResponse.json(
+            { error: { code: 'UPSTREAM_ERROR', message: 'Upstream LLM error. Please check your configuration (Key, Base URL, or Model).' } },
+            { status: 502 }
+        );
     }
 }

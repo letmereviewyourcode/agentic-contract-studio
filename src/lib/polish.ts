@@ -13,8 +13,11 @@ Only improve wording, descriptions, and examples.
 
 Return ONLY the improved tool JSON, no markdown, no explanation.`;
 
-export async function polishTool(tool: MCPTool, apiKey: string, model: string = 'gpt-4o-mini'): Promise<MCPTool> {
-    const client = new OpenAI({ apiKey });
+export async function polishTool(tool: MCPTool, apiKey: string, model: string = 'gpt-4o-mini', baseUrl?: string): Promise<MCPTool> {
+    const client = new OpenAI({
+        apiKey,
+        baseURL: baseUrl || undefined
+    });
 
     const response = await client.chat.completions.create({
         model,
@@ -35,12 +38,14 @@ export async function polishTool(tool: MCPTool, apiKey: string, model: string = 
     try {
         return JSON.parse(cleaned) as MCPTool;
     } catch {
-        throw new Error('LLM returned invalid JSON');
+        // Fallback: if LLM returns bad JSON, return the original deterministic tool
+        console.warn('LLM returned invalid JSON, falling back to original deterministic tool.');
+        return tool;
     }
 }
 
-export async function polishTools(tools: MCPTool[], apiKey: string, model: string = 'gpt-4o-mini'): Promise<MCPTool[]> {
-    return Promise.all(tools.map(t => polishTool(t, apiKey, model)));
+export async function polishTools(tools: MCPTool[], apiKey: string, model: string = 'gpt-4o-mini', baseUrl?: string): Promise<MCPTool[]> {
+    return Promise.all(tools.map(t => polishTool(t, apiKey, model, baseUrl)));
 }
 
 export function isPolishAvailable(): boolean {

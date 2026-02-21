@@ -4,7 +4,7 @@
 
 ## What Polish Does
 
-Polish calls GPT-4o-mini (configurable via `POLISH_MODEL`) to:
+Polish calls an OpenAI-compatible LLM (configurable via `POLISH_MODEL` and Base URL) to:
 
 1. Rewrite tool descriptions to be clear and action-oriented
 2. Improve parameter descriptions for unambiguity
@@ -43,18 +43,18 @@ The `/api/polish` endpoint only runs if **all three** conditions are met:
 
 | Gate | Check | Fail response |
 |---|---|---|
-| `PUBLIC_DEMO !== 'true'` | Not a public deployment | 403 `POLISH_DISABLED` |
-| `ENABLE_POLISH === 'true'` | Explicitly opted in | 403 `POLISH_DISABLED` |
-| `OPENAI_API_KEY` is set | Key present server-side | 403 `POLISH_DISABLED` |
+| `PUBLIC_DEMO !== 'true'` | Not a public deployment | 400 `MISSING_API_KEY` (unless user provides a BYOK key) |
+| `ENABLE_POLISH === 'true'` | Explicitly opted in | 400 `MISSING_API_KEY` |
+| `OPENAI_API_KEY` is set | Key present server-side | 400 `MISSING_API_KEY` |
 
-### 403 Response Format
+### 400 Response Format
 
 ```json
 {
   "ok": false,
   "error": {
-    "code": "POLISH_DISABLED",
-    "message": "Polish is disabled in the public demo. Run locally to enable."
+    "code": "MISSING_API_KEY",
+    "message": "Central LLM polish is disabled in the public demo. Provide your own OpenAI-compatible API key."
   }
 }
 ```
@@ -69,8 +69,16 @@ The `/api/polish` endpoint only runs if **all three** conditions are met:
 
 ---
 
-## Configuring the Model
+## Configuring the Model and Provider (BYOK)
 
+Because the Studio uses the OpenAI SDK underneath, it can be repointed at **any API that conforms to the OpenAI chat completions specification** (such as LiteLLM, vLLM, Ollama, Groq, etc.). 
+
+Users can override these dynamically in the About Menu BYOK inputs:
+
+- **Base URL**: e.g. `http://localhost:4000/v1`
+- **Model Name**: e.g. `claude-3-5-sonnet-20241022` or `llama3.1`
+
+Server defaults can be set in `.env.local`:
 ```bash
 # Default: gpt-4o-mini (cheap, fast, good enough for rewrites)
 POLISH_MODEL=gpt-4o-mini

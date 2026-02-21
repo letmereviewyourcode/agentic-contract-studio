@@ -42,16 +42,15 @@ PUBLIC_DEMO=true
 - GitHub repo (private recommended)
 - Vercel account linked to GitHub
 
-### Steps (NOT YET EXECUTED)
+### Steps (EXECUTED: GitHub Push)
 
 1. Push to GitHub:
    ```bash
-   git init
    git add .
-   git commit -m "Initial commit: Agent Contract Studio v0.2.0"
-   git remote add origin https://github.com/YOUR_ORG/agent-contract-studio.git
-   git push -u origin main
+   git commit -m "feat: initial commit of Agent Contract Studio v0.1.0"
+   gh repo create agentic-contract-studio --public --source=. --remote=origin --push
    ```
+   *Note: This repository is now live at `https://github.com/letmereviewyourcode/agentic-contract-studio`*
 
 2. Import in Vercel:
    - Go to [vercel.com/new](https://vercel.com/new)
@@ -62,7 +61,8 @@ PUBLIC_DEMO=true
 
 3. Environment variables in Vercel dashboard:
    ```
-   PUBLIC_DEMO=true        # Disables polish on public URL
+   PUBLIC_DEMO=true        # Forces Central Polish to require BYOK Key
+   # DO NOT set OPENAI_API_KEY on public deployments
    # DO NOT set OPENAI_API_KEY on public deployments
    ```
 
@@ -72,7 +72,7 @@ PUBLIC_DEMO=true
 
 | Variable | Set on Vercel? | Why |
 |---|---|---|
-| `PUBLIC_DEMO` | ✅ `true` | Blocks polish endpoint (403) |
+| `PUBLIC_DEMO` | ✅ `true` | Forces polish endpoint to require BYOK (400) |
 | `OPENAI_API_KEY` | ❌ Never on public | Avoid key abuse |
 | `ENABLE_POLISH` | ❌ Not needed | PUBLIC_DEMO overrides |
 

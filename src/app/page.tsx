@@ -20,6 +20,8 @@ export default function Home() {
   const [publicDemo, setPublicDemo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [userApiKey, setUserApiKey] = useState('');
+  const [userBaseUrl, setUserBaseUrl] = useState('');
+  const [userModel, setUserModel] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
     { role: 'assistant', content: 'Welcome to **Agent Contract Studio**! 🛠️\n\nImport your MCP tool specs from the left panel, then use the actions below to analyze and improve them.\n\n• **Score** — Run the deterministic rubric (0–100)\n• **Auto-Fix** — Normalize & add missing fields\n• **Polish** — LLM-powered rewrite (optional)\n• **Export** — Download improved specs' },
   ]);
@@ -123,7 +125,12 @@ export default function Home() {
       const res = await fetch('/api/polish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tools: fixedTools.length > 0 ? fixedTools : tools, userApiKey }),
+        body: JSON.stringify({
+          tools: fixedTools.length > 0 ? fixedTools : tools,
+          userApiKey,
+          userBaseUrl,
+          userModel
+        }),
       });
       const data = await res.json();
       if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message);
@@ -134,7 +141,7 @@ export default function Home() {
     } finally {
       setLoading(null);
     }
-  }, [tools, fixedTools, addMessage]);
+  }, [tools, fixedTools, addMessage, userApiKey, userBaseUrl, userModel]);
 
   const handleExport = useCallback(() => {
     if (fixedTools.length === 0) {
@@ -225,8 +232,8 @@ export default function Home() {
             </div>
             <h2 className="modal-title">Tool Credit Score <span className="modal-title-sub">(for Agents)</span></h2>
             <p className="modal-desc">
-              <strong>Why this exists:</strong> Agents fail in production because tool specs are underspecified. This scores your MCP tools and auto-fixes them so agents call tools reliably.<br /><br />
-              Optional LLM polish is local-only.
+              <strong>Why this exists:</strong> Agents fail because tool specs are underspecified. This scores and auto-fixes MCP tool contracts so agents call tools reliably.<br /><br />
+              <strong>Public demo is deterministic.</strong> Optional BYOK polish supports any OpenAI-compatible endpoint (including gateways like LiteLLM).
             </p>
 
             <div className="modal-links">
@@ -248,24 +255,58 @@ export default function Home() {
             </div>
 
             <div className="modal-note" style={{ textAlign: 'left' }}>
-              <p style={{ marginBottom: '16px' }}>Public demo runs deterministic mode; centralized LLM polish is disabled.</p>
-
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                Override with your OpenAI API Key (Local Browser Only):
+                Enable optional polish with your key (BYOK):
               </label>
-              <input
-                type="password"
-                value={userApiKey}
-                onChange={e => setUserApiKey(e.target.value)}
-                placeholder="sk-proj-..."
-                className="input"
-                style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                data-testid="byok-input"
-              />
-              <p style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-tertiary)' }}>
-                Your key is stored temporarily in React state and is never saved to disk or database.
-                Refresh the page to clear it.
-              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
+                <input
+                  type="password"
+                  value={userApiKey}
+                  onChange={e => setUserApiKey(e.target.value)}
+                  placeholder="API Key (sk-proj-...)"
+                  className="input"
+                  style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                  data-testid="byok-input-key"
+                />
+                <input
+                  type="text"
+                  value={userBaseUrl}
+                  onChange={e => setUserBaseUrl(e.target.value)}
+                  placeholder="Base URL (e.g. https://api.openai.com/v1)"
+                  className="input"
+                  style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                  data-testid="byok-input-url"
+                />
+                <input
+                  type="text"
+                  value={userModel}
+                  onChange={e => setUserModel(e.target.value)}
+                  placeholder="Model (e.g. gpt-4o-mini)"
+                  className="input"
+                  style={{ width: '100%', backgroundColor: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                  data-testid="byok-input-model"
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', margin: 0, maxWidth: '280px' }}>
+                  <strong>Warning:</strong> Key is used only for this request/session and is never stored server-side.
+                  Refresh the page to clear it.
+                </p>
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto', height: 'auto' }}
+                  onClick={() => {
+                    setUserApiKey('');
+                    setUserBaseUrl('');
+                    setUserModel('');
+                  }}
+                  data-testid="byok-clear-btn"
+                >
+                  Clear key
+                </button>
+              </div>
             </div>
 
             <div className="modal-version">{APP_VERSION}</div>

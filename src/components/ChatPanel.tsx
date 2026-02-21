@@ -53,7 +53,7 @@ export function ChatPanel({
 
     const isPolishReady = polishEnabled || userApiKey.trim().length > 0;
     const polishDisabledReason = !isPolishReady
-        ? 'Provide your OpenAI API key in the About menu to enable LLM polish.'
+        ? 'Provide your OpenAI-compatible API key in the About menu to enable LLM polish.'
         : null;
 
     return (
@@ -123,7 +123,7 @@ export function ChatPanel({
                         data-testid="polish-button"
                         title={polishDisabledReason || undefined}
                     >
-                        {loading === 'polish' ? <><span className="spinner" /> Polishing...</> : 'Polish (LLM)'}
+                        {loading === 'polish' ? <><span className="spinner" /> Polishing...</> : 'Polish with LLM (BYOK)'}
                     </button>
                     {polishDisabledReason && (
                         <span className="tooltip-text" data-testid="polish-tooltip">

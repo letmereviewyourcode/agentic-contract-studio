@@ -78,8 +78,8 @@ export async function POST(req: NextRequest) {
         const model = userModel?.trim() || process.env.POLISH_MODEL || 'gpt-4o-mini';
         const baseUrl = userBaseUrl?.trim() || undefined;
 
-        const polished = await polishTools(tools, apiKey, model, baseUrl);
-        return NextResponse.json({ polished });
+        const { polished, explanations } = await polishTools(tools, apiKey, model, baseUrl);
+        return NextResponse.json({ polished, explanation: explanations.join('\n\n') });
     } catch (e) {
         // Obfuscate upstream errors safely
         console.error('Upstream LLM error:', e);

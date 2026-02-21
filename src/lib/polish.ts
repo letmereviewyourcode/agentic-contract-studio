@@ -11,9 +11,15 @@ Given a tool specification, improve it by:
 Do NOT change core schema semantics (parameter names, types, required fields).
 Only improve wording, descriptions, and examples.
 
-Return ONLY the improved tool JSON, no markdown, no explanation.`;
+Return ONLY a valid JSON object with the following structure:
+{
+  "explanation": "A brief 1-2 sentence summary of the improvements made.",
+  "tool": { ...the improved tool JSON... }
+}
 
-export async function polishTool(tool: MCPTool, apiKey: string, model: string = 'gpt-4o-mini', baseUrl?: string): Promise<MCPTool> {
+Do NOT wrap it in markdown block quotes. Return only the raw JSON string.`;
+
+export async function polishTool(tool: MCPTool, apiKey: string, model: string = 'gpt-4o-mini', baseUrl?: string): Promise<{ tool: MCPTool; explanation: string }> {
     const client = new OpenAI({
         apiKey,
         baseURL: baseUrl || undefined
@@ -36,16 +42,32 @@ export async function polishTool(tool: MCPTool, apiKey: string, model: string = 
     const cleaned = content.replace(/^```(?:json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
 
     try {
-        return JSON.parse(cleaned) as MCPTool;
+        const parsed = JSON.parse(cleaned);
+
+        // Happy path: LLM followed the wrapper instruction
+        if (parsed.tool && parsed.explanation) {
+            return { tool: parsed.tool as MCPTool, explanation: parsed.explanation as string };
+        }
+
+        // Fallback: LLM hallucinated and just returned the tool directly
+        if (parsed.name && parsed.description) {
+            return { tool: parsed as MCPTool, explanation: 'Polished descriptions and examples.' };
+        }
+
+        throw new Error('Unrecognized JSON structure');
     } catch {
         // Fallback: if LLM returns bad JSON, return the original deterministic tool
         console.warn('LLM returned invalid JSON, falling back to original deterministic tool.');
-        return tool;
+        return { tool, explanation: 'The LLM returned invalid formatting. The original tool was retained.' };
     }
 }
 
-export async function polishTools(tools: MCPTool[], apiKey: string, model: string = 'gpt-4o-mini', baseUrl?: string): Promise<MCPTool[]> {
-    return Promise.all(tools.map(t => polishTool(t, apiKey, model, baseUrl)));
+export async function polishTools(tools: MCPTool[], apiKey: string, model: string = 'gpt-4o-mini', baseUrl?: string): Promise<{ polished: MCPTool[]; explanations: string[] }> {
+    const results = await Promise.all(tools.map(t => polishTool(t, apiKey, model, baseUrl)));
+    return {
+        polished: results.map(r => r.tool),
+        explanations: results.map(r => `**${r.tool.name}**: ${r.explanation}`)
+    };
 }
 
 export function isPolishAvailable(): boolean {

@@ -237,7 +237,8 @@ test.describe('Agent Contract Studio E2E', () => {
                         name: 'mock_polished_tool',
                         description: 'This is a mock polished description.',
                         inputSchema: { type: 'object', properties: {} }
-                    }]
+                    }],
+                    explanation: '**mock_polished_tool**: Polished the description.'
                 }
             });
         });

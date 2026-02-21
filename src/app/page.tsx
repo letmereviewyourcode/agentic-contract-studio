@@ -136,7 +136,11 @@ export default function Home() {
       const data = await res.json();
       if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message);
       setFixedTools(data.polished);
-      addMessage('assistant', `✨ **LLM polish complete!** Descriptions and examples have been rewritten for clarity. Check the **Diff** tab.`);
+      if (data.explanation) {
+        addMessage('assistant', `✨ **LLM polish complete!**\n\n${data.explanation}\n\nCheck the **Diff** tab.`);
+      } else {
+        addMessage('assistant', `✨ **LLM polish complete!** Descriptions and examples have been rewritten for clarity. Check the **Diff** tab.`);
+      }
     } catch (e) {
       addMessage('assistant', `❌ Polish error: ${(e as Error).message}`);
     } finally {

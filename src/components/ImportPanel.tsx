@@ -177,7 +177,7 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                         border: '1px solid rgba(239, 68, 68, 0.2)',
                         borderRadius: '8px',
                         color: 'var(--severity-error)',
-                        fontSize: '13px',
+                        fontSize: '16px',
                         marginBottom: '12px',
                     }} data-testid="import-error">
                         {error}
@@ -210,11 +210,11 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                             onClick={() => fileInputRef.current?.click()}
                             data-testid="file-drop-zone"
                         >
-                            <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.4 }}>📄</div>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                            <div style={{ fontSize: '42px', marginBottom: '8px', opacity: 0.4 }}>📄</div>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '18px' }}>
                                 Click to upload a <strong>.json</strong> file
                             </p>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '4px' }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '4px' }}>
                                 YAML support <span className="coming-soon">Coming soon</span>
                             </p>
                         </div>
@@ -231,7 +231,7 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
 
                 {activeTab === 'github' && (
                     <div>
-                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '15px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
                             Public GitHub Repository URL
                         </label>
                         <input
@@ -242,10 +242,10 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                             placeholder="https://github.com/owner/repo"
                             data-testid="github-input"
                         />
-                        <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px', lineHeight: '1.4' }}>
-                            Searches for <code style={{ color: 'var(--accent)', fontSize: '10px' }}>mcp.json</code>,{' '}
-                            <code style={{ color: 'var(--accent)', fontSize: '10px' }}>tools.json</code>,{' '}
-                            <code style={{ color: 'var(--accent)', fontSize: '10px' }}>openapi.json</code> in repo root and common paths.
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '6px', lineHeight: '1.4' }}>
+                            Searches for <code style={{ color: 'var(--accent)', fontSize: '13px' }}>mcp.json</code>,{' '}
+                            <code style={{ color: 'var(--accent)', fontSize: '13px' }}>tools.json</code>,{' '}
+                            <code style={{ color: 'var(--accent)', fontSize: '13px' }}>openapi.json</code> in repo root and common paths.
                         </p>
                         <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
                             <button
@@ -269,7 +269,7 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
 
                 {activeTab === 'mcp' && (
                     <div>
-                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '15px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
                             MCP Server URL
                         </label>
                         <input
@@ -279,7 +279,7 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                             placeholder="Coming soon..."
                             data-testid="mcp-input"
                         />
-                        <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }} data-testid="mcp-coming-soon">
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '6px' }} data-testid="mcp-coming-soon">
                             <span className="coming-soon">Coming soon</span> — MCP server discovery is not yet implemented.
                         </p>
                     </div>

@@ -136,6 +136,18 @@ export default function Home() {
       const data = await res.json();
       if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message);
       setFixedTools(data.polished);
+
+      // Re-score the polished tools so the UI scorecard reflects the LLM's new descriptions
+      const scoreRes = await fetch('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tools: data.polished }),
+      });
+      const scoreData = await scoreRes.json();
+      if (!scoreData.error) {
+        setScoreResults(scoreData.results);
+      }
+
       if (data.explanation) {
         addMessage('assistant', `✨ **LLM polish complete!**\n\n${data.explanation}\n\nCheck the **Diff** tab.`);
       } else {
@@ -286,7 +298,7 @@ export default function Home() {
             </div>
 
             <div className="modal-note" style={{ textAlign: 'left' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
+              <label style={{ display: 'block', fontSize: '16px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
                 Enable optional polish with your key (BYOK):
               </label>
 
@@ -321,19 +333,19 @@ export default function Home() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', margin: 0, maxWidth: '280px' }}>
+                <p style={{ fontSize: '14px', color: 'var(--text-tertiary)', margin: 0, maxWidth: '280px' }}>
                   <strong>Warning:</strong> Key is never stored server-side.
                   Refresh the page to clear it.
                 </p>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   {testStatus && (
-                    <span style={{ fontSize: '11px', color: testStatus.startsWith('❌') ? 'var(--error)' : (testStatus.startsWith('✅') ? 'var(--success)' : 'var(--text-tertiary)') }}>
+                    <span style={{ fontSize: '14px', color: testStatus.startsWith('❌') ? 'var(--error)' : (testStatus.startsWith('✅') ? 'var(--success)' : 'var(--text-tertiary)') }}>
                       {testStatus}
                     </span>
                   )}
                   <button
                     className="btn btn-secondary"
-                    style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto', height: 'auto' }}
+                    style={{ padding: '4px 8px', fontSize: '14px', minWidth: 'auto', height: 'auto' }}
                     onClick={handleTestConnection}
                     disabled={testStatus === 'Testing...'}
                   >
@@ -341,7 +353,7 @@ export default function Home() {
                   </button>
                   <button
                     className="btn btn-secondary"
-                    style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto', height: 'auto' }}
+                    style={{ padding: '4px 8px', fontSize: '14px', minWidth: 'auto', height: 'auto' }}
                     onClick={() => {
                       setUserApiKey('');
                       setUserBaseUrl('');

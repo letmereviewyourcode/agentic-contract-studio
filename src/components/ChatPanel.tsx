@@ -20,7 +20,7 @@ interface ChatPanelProps {
 function renderMarkdown(text: string): string {
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/`(.*?)`/g, '<code style="background:rgba(91,164,164,0.1);padding:1px 4px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:11px;color:var(--accent)">$1</code>')
+        .replace(/`(.*?)`/g, '<code style="background:rgba(91,164,164,0.1);padding:1px 4px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:14px;color:var(--accent)">$1</code>')
         .replace(/\n/g, '<br/>');
 }
 

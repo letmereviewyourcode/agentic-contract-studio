@@ -267,4 +267,83 @@ test.describe('Agent Contract Studio E2E', () => {
         expect(body.ok).toBe(false);
         expect(body.error.code).toBe('MISSING_API_KEY');
     });
+    // ─── Test 8: Edge Case - Invalid JSON Paste ────────────────────────
+    test('Edge Case: Invalid JSON paste gracefully fails', async ({ page }) => {
+        await page.getByTestId('tab-paste').click();
+        await page.getByTestId('paste-input').fill('this is not { valid json ]');
+        await page.getByTestId('btn-import-paste').click();
+        await expect(page.getByTestId('import-error')).toContainText('Invalid JSON', { timeout: 10000 });
+    });
+
+    // ─── Test 9: Edge Case - Invalid GitHub URL ────────────────────────
+    test('Edge Case: Invalid GitHub URL gracefully fails', async ({ page }) => {
+        await page.getByTestId('tab-github').click();
+        await page.getByTestId('github-input').fill('not-a-valid-url');
+        await page.getByTestId('btn-import-github').click();
+        await expect(page.getByTestId('import-error')).toContainText('Invalid GitHub URL', { timeout: 10000 });
+    });
+
+    // ─── Test 10: Edge Case - BYOK Test Connection Failure ──────────────
+    test('Edge Case: BYOK Test Connection upstream failure', async ({ page }) => {
+        await page.getByTestId('about-button').click();
+        const modal = page.getByTestId('about-modal');
+
+        // Fill with dummy info
+        await page.getByTestId('byok-input-key').fill('sk-test-fail-key');
+        await page.getByTestId('byok-input-url').fill('http://localhost:9999/bad-url');
+
+        // Mock the /api/polish endpoint to fail with 502 Upstream Error
+        await page.route('/api/polish', async route => {
+            await route.fulfill({
+                status: 502,
+                json: { error: { code: 'UPSTREAM_ERROR', message: 'Upstream LLM error. Please check your configuration (Key, Base URL, or Model).' } }
+            });
+        });
+
+        // Click Test
+        await modal.getByRole('button', { name: 'Test' }).click();
+
+        // Modal should display the exact fallback error text
+        await expect(modal).toContainText('❌ Failed: Upstream LLM error', { timeout: 10000 });
+    });
+
+    // ─── Test 11: Edge Case - Polish missing explanation fallback ──────
+    test('Edge Case: Polish LLM missing explanation fallback', async ({ page }) => {
+        // Prepare pipeline
+        await page.getByTestId('tab-paste').click();
+        await page.getByTestId('btn-load-sample').click();
+        await page.getByTestId('btn-import-paste').click();
+        await page.getByTestId('score-button').click();
+        await expect(page.getByTestId('chat-messages')).toContainText('Scoring complete');
+        await page.getByTestId('fix-button').click();
+        await expect(page.getByTestId('chat-messages')).toContainText('Auto-fix complete');
+
+        // Inject key to enable polish
+        await page.getByTestId('about-button').click();
+        await page.getByTestId('byok-input-key').fill('sk-test-key-no-explanation');
+        await page.getByTestId('about-modal').locator('button[aria-label="Close"]').click();
+
+        // Mock polish response WITHOUT an explanation (simulating LLM hallucination fallback)
+        await page.route('/api/polish', async route => {
+            await route.fulfill({
+                status: 200,
+                json: {
+                    polished: [{ name: 'mock_polished_tool', description: 'desc', inputSchema: {} }]
+                    // no explanation field
+                }
+            });
+        });
+
+        await page.route('/api/score', async route => {
+            await route.fulfill({
+                status: 200,
+                json: { results: [] }
+            });
+        });
+
+        await page.getByTestId('polish-button').click();
+
+        // Fallback generic message should appear since explanation was missing
+        await expect(page.getByTestId('chat-messages')).toContainText('Descriptions and examples have been rewritten for clarity');
+    });
 });

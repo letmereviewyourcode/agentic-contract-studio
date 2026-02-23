@@ -202,22 +202,22 @@ export function ResultsPanel({
                             marginBottom: '16px',
                         }}>
                             {errorCount > 0 && (
-                                <span style={{ fontSize: '11px', color: 'var(--red)', fontWeight: 600 }}>
+                                <span style={{ fontSize: '14px', color: 'var(--red)', fontWeight: 600 }}>
                                     {errorCount} error{errorCount !== 1 ? 's' : ''}
                                 </span>
                             )}
                             {warningCount > 0 && (
-                                <span style={{ fontSize: '11px', color: 'var(--yellow)', fontWeight: 600 }}>
+                                <span style={{ fontSize: '14px', color: 'var(--yellow)', fontWeight: 600 }}>
                                     {warningCount} warning{warningCount !== 1 ? 's' : ''}
                                 </span>
                             )}
                             {infoCount > 0 && (
-                                <span style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 600 }}>
+                                <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 600 }}>
                                     {infoCount} info
                                 </span>
                             )}
                             {allIssues.length === 0 && (
-                                <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 600 }}>
+                                <span style={{ fontSize: '14px', color: 'var(--green)', fontWeight: 600 }}>
                                     No issues found
                                 </span>
                             )}
@@ -276,7 +276,7 @@ export function ResultsPanel({
                 {/* ─── Diff View (Visual Hero) ────────────────────────────── */}
                 {activeView === 'diff' && diffJson && (
                     <div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '10px' }}>
                             {diffJson.filter(l => l.type === 'add').length} additions, {diffJson.filter(l => l.type === 'remove').length} deletions
                         </div>
                         <div className="diff-viewer" data-testid="diff-viewer">
@@ -322,7 +322,7 @@ export function ResultsPanel({
                                 className="btn btn-primary"
                                 onClick={() => handleDownload(fixedTools, 'tools-fixed.json')}
                                 data-testid="btn-download-fixed"
-                                style={{ fontSize: '11px', padding: '7px 12px' }}
+                                style={{ fontSize: '14px', padding: '7px 12px' }}
                             >
                                 Download Fixed
                             </button>
@@ -332,7 +332,7 @@ export function ResultsPanel({
                                 className="btn btn-secondary"
                                 onClick={() => handleDownload(originalTools, 'tools-original.json')}
                                 data-testid="btn-download-original"
-                                style={{ fontSize: '11px', padding: '7px 12px' }}
+                                style={{ fontSize: '14px', padding: '7px 12px' }}
                             >
                                 Download Original
                             </button>

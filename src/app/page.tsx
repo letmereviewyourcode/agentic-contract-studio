@@ -24,7 +24,7 @@ export default function Home() {
   const [userModel, setUserModel] = useState('');
   const [testStatus, setTestStatus] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    { role: 'assistant', content: 'Welcome to **Agent Contract Studio**! 🛠️\n\nImport your MCP tool specs from the left panel, then use the actions below to analyze and improve them.\n\n• **Score** — Run the deterministic rubric (0–100)\n• **Auto-Fix** — Normalize & add missing fields\n• **Polish** — LLM-powered rewrite (optional)\n• **Export** — Download improved specs' },
+    { role: 'assistant', content: 'Welcome to **Tool Credit Score**! 🛠️\n\nScore and auto-fix MCP tool specs so agents call tools reliably.\n\nImport your tool specs from the left panel, then use the actions below to analyze and improve them.\n\n• **Score** — Run the deterministic rubric (0–100)\n• **Auto-Fix** — Normalize & add missing fields\n• **Polish** — LLM-powered rewrite (optional)\n• **Export** — Download improved specs' },
   ]);
 
   // Fetch config on mount

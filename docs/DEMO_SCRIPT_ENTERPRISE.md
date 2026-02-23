@@ -161,3 +161,4 @@ If demoing the deployed public URL:
 - **Score 65 → 88** without any LLM
 - **Polish is optional** — local-only, server-side, never changes schema semantics
 - **Security** — key never in client, 403 enforcement in PUBLIC_DEMO
+- **Roadmap Note** — v0.1 supports Paste JSON, Upload, and GitHub import. Connecting to a live MCP Server URL automatically is planned as a v0.2 integration feature.

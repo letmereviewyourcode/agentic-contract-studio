@@ -165,7 +165,7 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                     disabled
                     data-testid="tab-mcp"
                 >
-                    🔌 MCP URL
+                    🔌 MCP URL (Coming Soon)
                 </button>
             </div>
 
@@ -276,11 +276,11 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                             className="input"
                             type="text"
                             disabled
-                            placeholder="Coming soon..."
+                            placeholder="Planned for v0.2..."
                             data-testid="mcp-input"
                         />
-                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '6px' }} data-testid="mcp-coming-soon">
-                            <span className="coming-soon">Coming soon</span> — MCP server discovery is not yet implemented.
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '6px', lineHeight: '1.4' }} data-testid="mcp-coming-soon">
+                            <span className="coming-soon">Coming soon</span> — Planned for v0.2: connect to a running MCP server and import tool definitions automatically.
                         </p>
                     </div>
                 )}

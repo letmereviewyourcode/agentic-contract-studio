@@ -6,6 +6,8 @@
 >
 > **Tool Credit Score** — Deterministic scoring + auto-fix for MCP tool specifications.  
 > Optional LLM polish (local-only).
+>
+> 🚀 **Live Demo:** [agentic-contract-studio.vercel.app](https://agentic-contract-studio.vercel.app/)
 
 ## Why this exists
 Agents fail in production because tool specs are underspecified. This studio scores your MCP tools and auto-fixes them so agents call tools reliably.

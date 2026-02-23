@@ -1,0 +1,77 @@
+[
+    {
+        "name": "searchUsers",
+        "description": "search for users",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "number"
+                },
+                "offset": {}
+            }
+        }
+    },
+    {
+        "name": "create-new-project",
+        "description": "Creates a project",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The project name"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The project description"
+                },
+                "owner_id": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ]
+        }
+    },
+    {
+        "name": "get_weather",
+        "description": "Retrieves current weather data for a specified location. Returns temperature, humidity, wind speed, and conditions. Throws an error if the location is not found.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "City name or coordinates (lat,lng)"
+                },
+                "units": {
+                    "type": "string",
+                    "enum": [
+                        "celsius",
+                        "fahrenheit"
+                    ],
+                    "description": "Temperature unit preference"
+                }
+            },
+            "required": [
+                "location"
+            ]
+        },
+        "annotations": {
+            "title": "Get Weather",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true
+        },
+        "examples": [
+            {
+                "location": "San Francisco, CA",
+                "units": "fahrenheit"
+            }
+        ]
+    }
+]

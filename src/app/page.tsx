@@ -276,7 +276,8 @@ export default function Home() {
             <h2 className="modal-title">Tool Credit Score <span className="modal-title-sub">(for Agents)</span></h2>
             <p className="modal-desc">
               <strong>Why this exists:</strong> Agents fail because tool specs are underspecified. This scores and auto-fixes MCP tool contracts so agents call tools reliably.<br /><br />
-              <strong>Public demo is deterministic.</strong> Optional BYOK polish supports any OpenAI-compatible endpoint. Gemini keys are auto-detected. LLM Polish provides a transparent explanation of its changes.
+              <strong>Public demo is deterministic.</strong> Optional BYOK polish supports any OpenAI-compatible endpoint. Gemini keys are auto-detected. LLM Polish provides a transparent explanation of its changes.<br /><br />
+              <strong>Roadmap:</strong> v0.1 GitHub import expects static JSON tool specs. v0.2 MCP URL import will support runtime discovery from live MCP servers.
             </p>
 
             <div className="modal-links">

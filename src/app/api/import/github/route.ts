@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json(
-            { success: false, tools: [], source: `github:${url}`, error: 'No tool definitions found in common paths' },
+            { success: false, tools: [], source: `github:${url}`, error: 'Could not find a static JSON tool spec in this repo. v0.1 GitHub import supports repos with tools.json/mcp.json. For dynamic MCP server codebases, use MCP URL import (coming in v0.2).' },
             { status: 404 }
         );
     } catch (e) {

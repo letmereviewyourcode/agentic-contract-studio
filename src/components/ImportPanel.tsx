@@ -243,9 +243,7 @@ export function ImportPanel({ onToolsLoaded }: ImportPanelProps) {
                             data-testid="github-input"
                         />
                         <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '6px', lineHeight: '1.4' }}>
-                            Searches for <code style={{ color: 'var(--accent)', fontSize: '13px' }}>mcp.json</code>,{' '}
-                            <code style={{ color: 'var(--accent)', fontSize: '13px' }}>tools.json</code>,{' '}
-                            <code style={{ color: 'var(--accent)', fontSize: '13px' }}>openapi.json</code> in repo root and common paths.
+                            Expects a repo containing a static <code style={{ color: 'var(--accent)', fontSize: '13px' }}>tools.json</code> or <code style={{ color: 'var(--accent)', fontSize: '13px' }}>mcp.json</code> spec file in common locations.
                         </p>
                         <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
                             <button

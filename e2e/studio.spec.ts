@@ -346,4 +346,25 @@ test.describe('Agent Contract Studio E2E', () => {
         // Fallback generic message should appear since explanation was missing
         await expect(page.getByTestId('chat-messages')).toContainText('Descriptions and examples have been rewritten for clarity');
     });
+
+    // ─── Test 12: Edge Case - GitHub repo without static JSON gracefully fails ──────
+    test('Edge Case: GitHub repo without static JSON gracefully fails', async ({ page }) => {
+        // Mock the GitHub import route to return the exact 404 error we added
+        await page.route('/api/import/github', async route => {
+            await route.fulfill({
+                status: 404,
+                json: {
+                    success: false,
+                    tools: [],
+                    error: 'Could not find a static JSON tool spec in this repo. v0.1 GitHub import supports repos with tools.json/mcp.json. For dynamic MCP server codebases, use MCP URL import (coming in v0.2).'
+                }
+            });
+        });
+
+        await page.getByTestId('tab-github').click();
+        await page.getByTestId('github-input').fill('https://github.com/github/github-mcp-server');
+        await page.getByTestId('btn-import-github').click();
+
+        await expect(page.getByTestId('import-error')).toContainText('dynamic MCP server codebases', { timeout: 10000 });
+    });
 });

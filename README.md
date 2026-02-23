@@ -22,7 +22,9 @@ You paste (or upload, or fetch from GitHub) an MCP tool spec, and the studio:
 
 No LLM is required for scoring or auto-fix — those are fully deterministic.
 
-**Note**: v0.1 supports Paste JSON, Upload, and GitHub import. Connecting to a live MCP Server URL is planned for v0.2.
+**Note**: 
+- **v0.1 GitHub import** = static JSON tool spec discovery
+- **v0.2 MCP URL import** = runtime tool discovery from a running MCP server
 
 ---
 
